@@ -1,10 +1,8 @@
 package arrayslices
 
 func Sum(numbers []int) (sum int) {
-	for _, number := range numbers {
-		sum += number
-	}
-	return sum
+	add := func(acc, x int) int { return acc + x }
+	return Reduce(numbers, add, 0)
 }
 
 func SumAll(numbersToSum ...[]int) (sums []int) {
@@ -14,14 +12,22 @@ func SumAll(numbersToSum ...[]int) (sums []int) {
 	return sums
 }
 
-func SumAllTail(numbersToSum ...[]int)(sums []int){
-	for _, numbers := range numbersToSum {
-		if len(numbers) == 0 {
-			sums = append(sums, 0)
+func SumAllTail(numbersToSum ...[]int) []int {
+	sumTail := func(acc, x []int) []int {
+		if len(x) == 0 {
+			return append(acc, 0)
 		} else {
-			tail := numbers[1:]
-			sums = append(sums, Sum(tail))
+			tail := x[1:]
+			return append(acc, Sum(tail))
 		}
 	}
-	return sums
+	return Reduce(numbersToSum, sumTail, []int{})
+}
+
+func Reduce[A any](collection []A, accumulator func(A, A) A, initialValue A) A {
+	var result = initialValue
+	for _, item := range collection {
+		result = accumulator(result, item)
+	}
+	return result
 }
